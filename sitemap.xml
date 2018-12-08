@@ -3,6 +3,11 @@
   xmlns:xhtml="http://www.w3.org/1999/xhtml">
   
   <url>
+    <loc>https://maekawatoshiki.github.io/blog/posts/%E3%83%86%E3%82%B9%E3%83%88/</loc>
+    <lastmod>2018-12-08T20:24:19+09:00</lastmod>
+  </url>
+  
+  <url>
     <loc>https://maekawatoshiki.github.io/blog/posts/%E3%81%84%E3%82%8D%E3%81%84%E3%82%8D/</loc>
     <lastmod>2018-12-08T20:06:33+09:00</lastmod>
   </url>
@@ -14,7 +19,7 @@
   
   <url>
     <loc>https://maekawatoshiki.github.io/blog/posts/</loc>
-    <lastmod>2018-12-08T20:06:33+09:00</lastmod>
+    <lastmod>2018-12-08T20:24:19+09:00</lastmod>
     <priority>0</priority>
   </url>
   
@@ -25,7 +30,7 @@
   
   <url>
     <loc>https://maekawatoshiki.github.io/blog/</loc>
-    <lastmod>2018-12-08T20:06:33+09:00</lastmod>
+    <lastmod>2018-12-08T20:24:19+09:00</lastmod>
     <priority>0</priority>
   </url>
   
