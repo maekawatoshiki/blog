@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Posts on uint256_t&#39;s blog</title>
+    <link>https://maekawatoshiki.github.io/blog/posts/</link>
+    <description>Recent content in Posts on uint256_t&#39;s blog</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>en-us</language>
+    <lastBuildDate>Sat, 08 Dec 2018 20:06:33 +0900</lastBuildDate>
+    
+	<atom:link href="https://maekawatoshiki.github.io/blog/posts/index.xml" rel="self" type="application/rss+xml" />
+    
+    
+    <item>
+      <title>いろいろ</title>
+      <link>https://maekawatoshiki.github.io/blog/posts/%E3%81%84%E3%82%8D%E3%81%84%E3%82%8D/</link>
+      <pubDate>Sat, 08 Dec 2018 20:06:33 +0900</pubDate>
+      
+      <guid>https://maekawatoshiki.github.io/blog/posts/%E3%81%84%E3%82%8D%E3%81%84%E3%82%8D/</guid>
+      <description>コードを書いてみる。
+fn fibo(n: i32)-&amp;gt; i32 {ifn&amp;lt;=2{return1;}returnfibo(n-1)+fibo(n-2);}fn main(){letn=38;println!(&amp;#34;fibo({}) = {}&amp;#34;,n,fibo(n));} うん、いい感じ。</description>
+    </item>
+    
+  </channel>
+</rss>
