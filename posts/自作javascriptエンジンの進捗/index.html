@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en-us">
+<head>
+<meta charset="utf-8">
+<meta name="description" content="">
+<meta name="generator" content="Hugo 0.53-DEV" />
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="stylesheet" href="https://maekawatoshiki.github.io/blog/css/style.css" type="text/css">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Code+Pro:400,700" type="text/css">
+<link rel="alternate" href="https://maekawatoshiki.github.io/blog/index.xml" type="application/rss+xml" title="uint256_t&#39;s blog">
+<title>自作JavaScriptエンジンの進捗 - uint256_t&#39;s blog</title>
+</head>
+<body>
+
+<header>
+  <div class="container clearfix">
+    <a class="path" href="https://maekawatoshiki.github.io/blog">[uint256_t&#39;s blog]</a>
+    <span class="caret"># _</span>
+    <div class="right">
+      
+    </div>
+  </div>
+</header>
+
+<div class="container">
+
+
+<main role="main" class="article">
+  
+<article class="single" itemscope itemtype="http://schema.org/BlogPosting">
+  <div class="meta">
+
+    <span class="key">published on</span>
+    <span class="val"><time itemprop="datePublished" datetime="2018-12-10">December 10, 2018</time></span>
+
+
+
+  </div>
+  <h1 class="headline" itemprop="headline">自作JavaScriptエンジンの進捗</h1>
+  <section class="body" itemprop="articleBody">
+    
+
+<h1 id="この記事は何">この記事は何?</h1>
+
+<p><a href="https://adventar.org/calendars/3191">セキュリティキャンプ 修了生進捗 #seccamp OB/OG Advent Calendar 2018</a> 20日目。</p>
+
+<p>この記事では，セキュキャンが始まるちょっと前から作り始めた自作JSエンジン <a href="https://github.com/maekawatoshiki/rapidus">rapidus</a> の進捗と，簡単に内部構造を説明していきたいと思います．</p>
+
+<h1 id="目次">目次</h1>
+
+<ol>
+<li>大まかな仕様</li>
+<li>内部構造
+
+<ol>
+<li>パーサー</li>
+<li>コード生成</li>
+<li>VM</li>
+<li>&hellip;.</li>
+</ol></li>
+</ol>
+
+<h1 id="1-大まかな仕様">1. 大まかな仕様</h1>
+
+<h2 id="tl-dr">TL;DR</h2>
+
+<ul>
+<li>だいたいJSっぽいコードを書いて実行できる(===規格に完全には沿えていない)</li>
+<li>REPLがちょっと使える</li>
+<li>Tracing-JITに部分的には対応している(===うまく行くとめちゃくちゃ速い. NodeJSより速い.)</li>
+<li>最近，Rustで書いたDLLを<code>require</code>から使えるようになった(===もはやなんでもできる!)</li>
+<li>また最近，非同期処理の実装を始めた</li>
+</ul>
+
+<h2 id="ちょっと詳しく">ちょっと詳しく</h2>
+
+<h1 id="2-内部構造">2. 内部構造</h1>
+
+<p>内部構造なんて大層なものではないですが、大体こんな感じ:</p>
+
+<p><img src="./internal.png" alt="internal" /></p>
+
+<p>ソースコードが，パーサー→意味解析→コード生成と段階を経てVMで実行できる形式に変換されます．</p>
+
+<p>VMから点線で矢印が出ていますが，これは<code>eval</code>や<code>require</code>なんかでVMからソースコード→&hellip;→コード生成をしないといけない場合があるからです．</p>
+
+<h2 id="パーサー-src-parser-rs">パーサー (<code>src/parser.rs</code>)</h2>
+
+<blockquote>
+<p><strong>構文解析器</strong>（こうぶんかいせきき）とは、<a href="https://ja.wikipedia.org/wiki/%E6%A7%8B%E6%96%87%E8%A7%A3%E6%9E%90">構文解析</a>をおこなう<a href="https://ja.wikipedia.org/wiki/%E3%83%97%E3%83%AD%E3%82%B0%E3%83%A9%E3%83%A0_(%E3%82%B3%E3%83%B3%E3%83%94%E3%83%A5%E3%83%BC%E3%82%BF)">プログラム</a>。<strong>パーサ</strong> (parser)とも。<a href="https://ja.wikipedia.org/wiki/%E3%83%97%E3%83%AD%E3%82%B0%E3%83%A9%E3%83%9F%E3%83%B3%E3%82%B0%E8%A8%80%E8%AA%9E">プログラミング言語</a>処理系の入力部分が代表的であるが、それに限らず設定ファイルの読み込みなど、構造を持った入力テキストの処理を行う。<a href="https://ja.wikipedia.org/wiki/%E8%87%AA%E7%84%B6%E8%A8%80%E8%AA%9E%E5%87%A6%E7%90%86">自然言語処理</a>でも使われる。</p>
+
+<p><a href="https://ja.wikipedia.org/wiki/%E6%A7%8B%E6%96%87%E8%A7%A3%E6%9E%90%E5%99%A8">構文解析器 - Wikipedia</a></p>
+</blockquote>
+
+<p>rapidusのパーサーは基本的に手書きの再帰下降構文解析器で構成されています．若干コード生成に関係するような処理もしていますが，基本的にはパーサーとしての機能のみを果たしています．特に面白い実装がしてあるわけでもないです．</p>
+
+<h2 id="意味解析">意味解析</h2>
+
+  </section>
+</article>
+
+</main>
+
+</div>
+
+<footer>
+  <div class="container">
+    <span class="copyright">&copy; 2018 uint256_t&#39;s blog - <a rel="license" href="http://creativecommons.org/licenses/by/4.0/">CC BY 4.0</a></span>
+  </div>
+</footer>
+
+</body>
+</html>
+
