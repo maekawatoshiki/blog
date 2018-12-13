@@ -64,15 +64,95 @@
 
 <h2 id="tl-dr">TL;DR</h2>
 
-<ul>
-<li>だいたいJSっぽいコードを書いて実行できる(===規格に完全には沿えていない)</li>
+<ol>
+<li>だいたいJSっぽいコードを書いて実行できる(===規格にまだ沿えていない)</li>
 <li>REPLがちょっと使える</li>
-<li>Tracing-JITに部分的には対応している(===うまく行くとめちゃくちゃ速い. NodeJSより速い.)</li>
+<li>Tracing-JITに部分的に対応している(===うまく行くと速い)</li>
 <li>最近，Rustで書いたDLLを<code>require</code>から使えるようになった(===もはやなんでもできる!)</li>
 <li>また最近，非同期処理の実装を始めた</li>
-</ul>
+</ol>
 
 <h2 id="ちょっと詳しく">ちょっと詳しく</h2>
+
+<h3 id="1-だいたいjs">1. だいたいJS</h3>
+
+<p>だいたいJSというのは，規格に沿えていなかったり 意外と基本的な機能が抜けている，という意味です．例えば，この記事を書いている時点では<code>Object</code>オブジェクトがなかったり，組み込みオブジェクトの機能が足りていなかったりします．</p>
+
+<p>ですが大体はJSなので，そこそこのコードは動きます．例えば，ミラーラビン素数判定法で素数(&lt;2^32)を判定したい! というニッチな需要にも対応できます．</p>
+<div class="highlight"><pre class="chroma"><code class="language-js" data-lang="js"><span class="kd">function</span> <span class="nx">prime</span><span class="p">(</span><span class="nx">n</span><span class="p">)</span> <span class="p">{</span>
+  <span class="k">if</span> <span class="p">(</span><span class="nx">n</span> <span class="o">==</span> <span class="mi">2</span> <span class="o">||</span> <span class="nx">n</span> <span class="o">==</span> <span class="mi">3</span><span class="p">)</span> <span class="k">return</span> <span class="kc">true</span><span class="p">;</span>
+  <span class="k">if</span> <span class="p">((</span><span class="nx">n</span> <span class="o">&amp;</span> <span class="mi">1</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">)</span>     <span class="k">return</span> <span class="kc">false</span><span class="p">;</span>
+
+  <span class="kd">var</span> <span class="nx">d</span> <span class="o">=</span> <span class="nx">n</span> <span class="o">-</span> <span class="mi">1</span><span class="p">;</span>
+  <span class="k">while</span> <span class="p">((</span><span class="nx">d</span> <span class="o">&amp;</span> <span class="mi">1</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">)</span> <span class="nx">d</span> <span class="o">=</span> <span class="nb">Math</span><span class="p">.</span><span class="nx">floor</span><span class="p">(</span><span class="nx">d</span> <span class="o">&gt;&gt;</span> <span class="mi">1</span><span class="p">);</span>
+  
+  <span class="k">for</span> <span class="p">(</span><span class="kd">var</span> <span class="nx">k</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="nx">k</span> <span class="o">&lt;</span> <span class="mi">20</span><span class="p">;</span> <span class="nx">k</span><span class="o">++</span><span class="p">)</span> <span class="p">{</span>
+    <span class="kd">var</span> <span class="nx">t</span> <span class="o">=</span> <span class="nx">d</span><span class="p">;</span>
+    <span class="kd">var</span> <span class="nx">x</span> <span class="o">=</span> <span class="nx">modpow</span><span class="p">(</span><span class="mi">1</span> <span class="o">+</span> <span class="nb">Math</span><span class="p">.</span><span class="nx">floor</span><span class="p">(</span><span class="nb">Math</span><span class="p">.</span><span class="nx">random</span><span class="p">()</span> <span class="o">*</span> <span class="p">(</span><span class="nx">n</span> <span class="o">-</span> <span class="mi">2</span><span class="p">)),</span> <span class="nx">t</span><span class="p">,</span> <span class="nx">n</span><span class="p">);</span>
+  
+    <span class="k">while</span> <span class="p">(</span><span class="nx">t</span> <span class="o">!=</span> <span class="nx">n</span> <span class="o">-</span> <span class="mi">1</span> <span class="o">&amp;&amp;</span> <span class="nx">x</span> <span class="o">!=</span> <span class="mi">1</span> <span class="o">&amp;&amp;</span> <span class="nx">x</span> <span class="o">!=</span> <span class="nx">n</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span> <span class="p">{</span>
+      <span class="nx">x</span> <span class="o">=</span> <span class="nx">modpow</span><span class="p">(</span><span class="nx">x</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="nx">n</span><span class="p">);</span>
+      <span class="nx">t</span> <span class="o">=</span> <span class="nx">t</span> <span class="o">&lt;&lt;</span> <span class="mi">1</span><span class="p">;</span>
+    <span class="p">}</span>
+  
+    <span class="k">if</span> <span class="p">(</span><span class="nx">x</span> <span class="o">!=</span> <span class="nx">n</span> <span class="o">-</span> <span class="mi">1</span> <span class="o">&amp;&amp;</span> <span class="p">(</span><span class="nx">t</span> <span class="o">&amp;</span> <span class="mi">1</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">)</span> <span class="k">return</span> <span class="kc">false</span><span class="p">;</span>
+  <span class="p">}</span>
+
+  <span class="k">return</span> <span class="kc">true</span><span class="p">;</span>
+<span class="p">}</span>
+
+<span class="kd">function</span> <span class="nx">modpow</span><span class="p">(</span><span class="nx">base</span><span class="p">,</span> <span class="nx">power</span><span class="p">,</span> <span class="nx">mod</span><span class="p">)</span> <span class="p">{</span>
+  <span class="kd">var</span> <span class="nx">result</span> <span class="o">=</span> <span class="mi">1</span><span class="p">;</span>
+  <span class="k">while</span> <span class="p">(</span><span class="nx">power</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">)</span> <span class="p">{</span>
+    <span class="k">if</span> <span class="p">((</span><span class="nx">power</span> <span class="o">&amp;</span> <span class="mi">1</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">)</span> <span class="nx">result</span> <span class="o">=</span> <span class="p">(</span><span class="nx">result</span> <span class="o">*</span> <span class="nx">base</span><span class="p">)</span> <span class="o">%</span> <span class="nx">mod</span><span class="p">;</span>
+    <span class="nx">base</span> <span class="o">=</span> <span class="p">(</span><span class="nx">base</span> <span class="o">*</span> <span class="nx">base</span><span class="p">)</span> <span class="o">%</span> <span class="nx">mod</span><span class="p">;</span>
+    <span class="nx">power</span> <span class="o">=</span> <span class="nb">Math</span><span class="p">.</span><span class="nx">floor</span><span class="p">(</span><span class="nx">power</span> <span class="o">&gt;&gt;</span> <span class="mi">1</span><span class="p">);</span>
+  <span class="p">}</span>
+  <span class="k">return</span> <span class="nx">result</span><span class="p">;</span>
+<span class="p">}</span>
+
+<span class="k">for</span> <span class="p">(</span><span class="kd">var</span> <span class="nx">i</span> <span class="o">=</span> <span class="mi">2</span><span class="p">;</span> <span class="nx">i</span> <span class="o">&lt;</span> <span class="mi">100000</span><span class="p">;</span> <span class="nx">i</span><span class="o">++</span><span class="p">)</span>
+  <span class="k">if</span> <span class="p">(</span><span class="nx">prime</span><span class="p">(</span><span class="nx">i</span><span class="p">))</span> <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="nx">i</span><span class="p">);</span>
+</code></pre></div>
+<p>上記のようなコードは普通に動作します．一応，NodeJSと戦ってみる． (上記のコードから<code>console.log(i)</code>だけ消して<code>;</code>にしたコードを実行しました)</p>
+<div class="highlight"><pre class="chroma"><code class="language-sh" data-lang="sh">$ <span class="nb">time</span> node miller.js
+real <span class="m">0</span>.19
+user <span class="m">0</span>.18
+sys <span class="m">0</span>.01
+$ <span class="nb">time</span> ./target/release/rapidus miller.js
+real <span class="m">0</span>.19
+user <span class="m">0</span>.19
+sys <span class="m">0</span>.00</code></pre></div>
+<p>数値だけ使ってるループとかはJITの対象になるので，そこそこ速く動きます．JITについてはまた後で.</p>
+
+<p>ああ，あと，動作確認済みのサンプルコードは<code>./examples/</code>に入っています．(どれも微妙なコードばっかりなので，適当に先にNodeJSとかで実行して出力を確認してみてください)</p>
+
+<h3 id="2-repl">2. REPL</h3>
+
+<p>そのままです. REPLがちょっと使えます．</p>
+<div class="highlight"><pre class="chroma"><code class="language-sh" data-lang="sh">$ ./target/release/rapidus
+&gt; var <span class="nv">x</span> <span class="o">=</span> <span class="m">123</span>
+&gt; x
+<span class="m">123</span>
+&gt; x + <span class="m">111</span>
+<span class="m">234</span>
+&gt; $ ^ <span class="m">1</span>
+runtime error: reference error: <span class="s1">&#39;$&#39;</span> is not defined
+&gt; ..
+&gt;&gt; <span class="k">function</span> f<span class="o">(</span>x<span class="o">)</span> <span class="o">{</span>
+&gt;&gt;  <span class="k">if</span> <span class="o">(</span><span class="nv">x</span> <span class="o">===</span> <span class="m">1</span><span class="o">)</span> <span class="k">return</span> <span class="m">1</span><span class="p">;</span>
+&gt;&gt;  <span class="k">return</span> f<span class="o">(</span>x - <span class="m">1</span><span class="o">)</span> * x<span class="p">;</span>
+&gt;&gt; <span class="o">}</span>
+&gt;&gt; ..
+&gt; f<span class="o">(</span><span class="m">5</span><span class="o">)</span>
+<span class="m">120</span>
+&gt; <span class="nv">Function</span> <span class="o">===</span> f.__proto__.constructor
+<span class="nb">true</span>
+&gt; Function.prototype <span class="o">===</span> f.__proto__
+<span class="nb">true</span>
+&gt; <span class="o">[]</span> <span class="o">===</span> <span class="o">[]</span>
+false</code></pre></div>
+<p><code>..</code>で複数行入力を開始できるようになっていますが，不便なので直したいですね．</p>
 
 <h1 id="2-内部構造">2. 内部構造</h1>
 
@@ -80,7 +160,7 @@
 
 <p><img src="./internal.png" alt="internal" /></p>
 
-<p>ソースコードが，パーサー→意味解析→コード生成と段階を経てVMで実行できる形式に変換されます．</p>
+<p>ソースコード→パーサー→コード生成と段階を経てVMで実行できる形式に変換されます．</p>
 
 <p>VMから点線で矢印が出ていますが，これは<code>eval</code>や<code>require</code>なんかでVMからソースコード→&hellip;→コード生成をしないといけない場合があるからです．</p>
 
