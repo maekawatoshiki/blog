@@ -56,18 +56,18 @@
 <h1 id="目次">目次</h1>
 
 <ol>
-<li>大まかな仕様</li>
+<li>概要</li>
+<li>言語処理系とは</li>
 <li>内部構造
 
 <ol>
 <li>パーサー</li>
 <li>コード生成</li>
 <li>VM</li>
-<li>&hellip;.</li>
 </ol></li>
 </ol>
 
-<h1 id="1-大まかな仕様">1. 大まかな仕様</h1>
+<h1 id="1-概要">1. 概要</h1>
 
 <h2 id="tl-dr">TL;DR</h2>
 
@@ -83,9 +83,11 @@
 
 <h3 id="1-だいたいjs">1. だいたいJS</h3>
 
-<p>だいたいJSというのは，規格に沿えていなかったり 意外と基本的な機能が抜けている，という意味です．例えば，この記事を書いている時点では<code>Object</code>オブジェクトがなかったり，組み込みオブジェクトの機能が足りていなかったりします．</p>
+<p>だいたいJSというのは，規格に沿えていなかったり 意外と基本的な機能が抜けている，という意味です．例えば，<del>この記事を書いている時点では<code>Object</code>オブジェクトがなかったり</del>(作り始めた)，組み込みオブジェクトの機能が足りていなかったりします．</p>
 
-<p>ですが大体はJSなので，そこそこのコードは動きます．例えば，ミラーラビン素数判定法で素数(&lt;2^32)を判定したい! というニッチな需要にも対応できます．</p>
+<p>ですが大体はJSなので，そこそこのコードは動きます．ちゃんとプロトタイプチェーンで継承的なこともできますよ．</p>
+
+<p>ミラーラビン素数判定法で素数(&lt;2^32)を判定したい! というニッチな需要にも対応できます．</p>
 <div class="highlight"><pre class="chroma"><code class="language-js" data-lang="js"><span class="kd">function</span> <span class="nx">prime</span><span class="p">(</span><span class="nx">n</span><span class="p">)</span> <span class="p">{</span>
   <span class="k">if</span> <span class="p">(</span><span class="nx">n</span> <span class="o">==</span> <span class="mi">2</span> <span class="o">||</span> <span class="nx">n</span> <span class="o">==</span> <span class="mi">3</span><span class="p">)</span> <span class="k">return</span> <span class="kc">true</span><span class="p">;</span>
   <span class="k">if</span> <span class="p">((</span><span class="nx">n</span> <span class="o">&amp;</span> <span class="mi">1</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">)</span>     <span class="k">return</span> <span class="kc">false</span><span class="p">;</span>
@@ -121,7 +123,7 @@
 <span class="k">for</span> <span class="p">(</span><span class="kd">var</span> <span class="nx">i</span> <span class="o">=</span> <span class="mi">2</span><span class="p">;</span> <span class="nx">i</span> <span class="o">&lt;</span> <span class="mi">100000</span><span class="p">;</span> <span class="nx">i</span><span class="o">++</span><span class="p">)</span>
   <span class="k">if</span> <span class="p">(</span><span class="nx">prime</span><span class="p">(</span><span class="nx">i</span><span class="p">))</span> <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="nx">i</span><span class="p">);</span>
 </code></pre></div>
-<p>上記のようなコードは普通に動作します．一応，NodeJSと戦ってみる． (上記のコードから<code>console.log(i)</code>だけ消して<code>;</code>にしたコードを実行しました)</p>
+<p>上記のようなコードは普通に動作します．一応，NodeJSと戦ってみる． (上記のコードから<code>console.log(i)</code>だけ消したコードを実行しました)</p>
 <div class="highlight"><pre class="chroma"><code class="language-sh" data-lang="sh">$ <span class="nb">time</span> node miller.js
 real <span class="m">0</span>.19
 user <span class="m">0</span>.18
@@ -132,7 +134,7 @@ user <span class="m">0</span>.19
 sys <span class="m">0</span>.00</code></pre></div>
 <p>数値だけ使ってるループとかはJITの対象になるので，そこそこ速く動きます．JITについてはまた後で.</p>
 
-<p>あと，動作確認済みのサンプルコードは<code>./examples/</code>に入っています．(どれも微妙なコードばっかりなので，適当に先にNodeJSとかで実行して出力を確認してみてください)</p>
+<p>動作確認済みのサンプルコードは<code>./examples/</code>に入っています．どれも微妙なコードばっかりなので，適当に先にNodeJSとかで実行して出力を確認してみてください．</p>
 
 <h3 id="2-repl">2. REPL</h3>
 
@@ -171,7 +173,7 @@ false</code></pre></div>
 
 <p>Tracing-JITに対応しているので，いい感じのコードを書くといい感じの速度で実行されます．</p>
 
-<p>現在は関数，ループ単位でJITコンパイルを行っていて，数値やブール値を使った処理をしている場合(<code>console.log</code>では文字列を使っていいけど)はJITの対象となります．これがいい感じのコードってわけです．</p>
+<p>現在は関数，ループ単位でJITコンパイルを行っていて，数値やブール値のみを使った処理をしている場合(<code>console.log</code>では文字列を使っていいけど)はJITの対象となります．これがいい感じのコードってわけです．</p>
 
 <p>以下のようなフィボナッチ数を求める関数は当然JITコンパイルされて実行されます．</p>
 <div class="highlight"><pre class="chroma"><code class="language-js" data-lang="js"><span class="kd">function</span> <span class="nx">fibo</span><span class="p">(</span><span class="nx">x</span><span class="p">)</span> <span class="p">{</span>
@@ -227,28 +229,74 @@ false</code></pre></div>
 00C 何らかの命令
 </code></pre>
 
-<h4 id="3-2-jitって-アセンブラでも書いたの">3.2 JITって アセンブラでも書いたの?</h4>
+<h4 id="3-2-jitってアセンブラでも書いたの">3.2 JITってアセンブラでも書いたの?</h4>
 
 <p>いいえ．LLVMの力を借りて作りました．</p>
+
+<p>Rustでアセンブラを作りたいなぁと思っているので，もしかしたらいつかLLVMの力を借りなくてもJITできるようになるかもしれません．</p>
 
 <h3 id="4-power-of-dlls">4. Power of DLLs</h3>
 
 <p>NodeJS用のコードを見ていて，<code>require</code>するモジュールってC++とかで書けるのかー，なんでもできて楽しそうだなぁ，と思ったので自分も作りました．</p>
 
 <p>RustでDynamic Link Libraryを作って，<code>require</code>で読み込ませると使えます．詳しいやり方はREADMEに書いてあるのでそちらを参照してください．</p>
-<div class="highlight"><pre class="chroma"><code class="language-js" data-lang="js"><span class="kd">var</span> <span class="nx">fs</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s2">&#34;fs&#34;</span><span class="p">)</span> <span class="err">#</span> <span class="nx">カレントディレクトリにlibfs</span><span class="p">.(</span><span class="nx">so</span><span class="o">|</span><span class="nx">dll</span><span class="o">|</span><span class="nx">dylib</span><span class="p">)</span><span class="nx">という名前</span>
-                       <span class="err">#</span> <span class="nx">のファイルがあれば</span><span class="p">,</span> <span class="nx">そこから読み込む</span>
+<div class="highlight"><pre class="chroma"><code class="language-js" data-lang="js"><span class="kd">var</span> <span class="nx">fs</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s2">&#34;myfs&#34;</span><span class="p">)</span> <span class="err">#</span> <span class="nx">カレントディレクトリにlibmyfs</span><span class="p">.(</span><span class="nx">so</span><span class="o">|</span><span class="nx">dll</span><span class="o">|</span><span class="nx">dylib</span><span class="p">)</span><span class="nx">という名前</span>
+                         <span class="err">#</span> <span class="nx">のファイルがあれば</span><span class="p">,</span> <span class="nx">そこから読み込む</span>
 <span class="nx">fs</span><span class="p">.</span><span class="nx">writeFileSync</span><span class="p">(</span><span class="s2">&#34;a.txt&#34;</span><span class="p">,</span> <span class="s2">&#34;hello&#34;</span><span class="p">)</span> <span class="err">#</span> <span class="nx">適当に作ったwriteFileSyncを呼び出せる</span>
 </code></pre></div>
-<p>IoT機器とか，自分の作った言語処理系からいじったりできたら楽しいそうですよね．</p>
+<p>IoT機器とか，自分の作った言語処理系からいじったりできたら楽しそうですよね．</p>
 
 <h3 id="5-非同期処理もどき">5. 非同期処理もどき</h3>
 
 <p>まだ最近作り始めたばっかりで，非同期処理と言って良いのかよくわからないレベルのものです．</p>
 
-<p>一応，<code>setTimeout</code>, <code>setInterval</code>, <code>clearTimeout</code>, <code>clearInterval</code>などを部分的に利用することができます．昔懐かしいWebサイトで沢山使われていそうな関数たちですね．あと，ファイルを非同期で読み込める関数も作ってみました(現在はaioブランチにある)．意外とちゃんと動いているので今後が楽しみです．</p>
+<p>一応，<code>setTimeout</code>, <code>setInterval</code>, <code>clearTimeout</code>, <code>clearInterval</code>などを部分的に利用することができます．昔懐かしいWebサイトで沢山使われていそうな関数たちですね．</p>
 
-<h1 id="2-内部構造">2. 内部構造</h1>
+<p>あと，ファイルを非同期で読み込める関数も作ってみました(現在はaioブランチにある)．意外とちゃんと動いているので今後が楽しみです．</p>
+
+<h1 id="2-言語処理系とは">2. 言語処理系とは</h1>
+
+<p><em>基本的なことが書いてあるセクションなので，識者は飛ばしてOK</em></p>
+
+<blockquote>
+<p>プログラミング言語の実装は、プログラミング言語処理系と呼ばれる。<a href="https://ja.wikipedia.org/wiki/%E3%82%B3%E3%83%B3%E3%83%91%E3%82%A4%E3%83%A9">コンパイラ</a>は、<a href="https://ja.wikipedia.org/wiki/%E3%82%BD%E3%83%BC%E3%82%B9%E3%82%B3%E3%83%BC%E3%83%89">ソースコード</a>などの入力を<a href="https://ja.wikipedia.org/wiki/%E4%B8%AD%E9%96%93%E8%A1%A8%E7%8F%BE">中間表現</a>などの、より解釈実行しやすい表現に変換する処理系である。また、<a href="https://ja.wikipedia.org/wiki/%E3%82%A4%E3%83%B3%E3%82%BF%E3%83%97%E3%83%AA%E3%82%BF">インタプリタ</a>は、入力されたプログラムを解釈実行する処理系である（ハードウェアの<a href="https://ja.wikipedia.org/wiki/%E3%83%97%E3%83%AD%E3%82%BB%E3%83%83%E3%82%B5">プロセッサ</a>は、<a href="https://ja.wikipedia.org/wiki/%E6%A9%9F%E6%A2%B0%E8%AA%9E">機械語</a>を解釈実行する<a href="https://ja.wikipedia.org/wiki/%E3%82%A4%E3%83%B3%E3%82%BF%E3%83%97%E3%83%AA%E3%82%BF">インタプリタ</a>である、と見ることができる）。</p>
+
+<p><a href="https://ja.wikipedia.org/wiki/%E3%83%97%E3%83%AD%E3%82%B0%E3%83%A9%E3%83%9F%E3%83%B3%E3%82%B0%E8%A8%80%E8%AA%9E#%E5%87%A6%E7%90%86%E7%B3%BB">プログラミング言語::処理系 - Wikipedia</a></p>
+</blockquote>
+
+<p>言語処理系は，私たちが書いたコードをコンピュータに理解できる形式に変換してくれるものです．私たちのすぐそばに，いつだって存在していますね．</p>
+
+<p>ですが，言語処理系を普段から作らない人にとっては，それがどのように動いているのかというのはブラックボックス化しているのではないでしょうか．</p>
+
+<h2 id="2-1-ソースコードが字句に-木に-中間表現に-バイナリに">2.1 ソースコードが字句に，木に，中間表現に，バイナリに</h2>
+
+<p>まずソースコードがありますね．</p>
+
+<pre><code>x = 1 + 2;
+</code></pre>
+
+<p>ここから何が起きるのでしょうか．</p>
+
+<pre><code>Identifier(x)
+Symbol(=)
+Number(1)
+Symbol(+)
+Number(2)
+Symbol(;)
+</code></pre>
+
+<p>何やら見慣れない形へと変わりましたね．これは<strong>字句解析</strong>というもので，ソースコードを最小単位(<strong>トークン</strong>)に分けて後の処理で扱いやすくする工程です．<code>Identifier(x)</code>は<code>x</code>という識別子(変数名とか)，<code>Number(1)</code>は数字の１というように，それが何を表しているのかという情報も付随します．</p>
+
+<pre><code>    =
+   / \
+  x   +
+     / \
+    1   2
+</code></pre>
+
+<p>ソースコードだったものが，もはや図になってしまいました．これは構文解析という工程で，トークンの列を分岐点が特定の意味を持つ木(<strong>抽象構文木</strong>)へと変換します．<code>;</code>などの特に意味を持たない記号(というと怒られそうですが)はなくなりより抽象的になっています．</p>
+
+<h1 id="3-内部構造">3. 内部構造</h1>
 
 <p>内部構造なんて大層なものではないですが、大体こんな感じ:</p>
 
@@ -270,9 +318,16 @@ false</code></pre></div>
 
 <h2 id="コード生成-src-vm-codegen-rs">コード生成 (<code>src/vm_codegen.rs</code>)</h2>
 
-<p>コード生成とは言っていますが，意味解析も少し含んでいます．</p>
+<p>VM向けのコード生成をします．基本的にはパーサーが生成したASTを巡回しながらVM命令を生成していくだけです．</p>
 
-<p>基本的にはパーサーが生成したASTを巡回しながらVM命令を生成していくだけです．</p>
+<p>パーサーとコード生成の間に意味解析とかが足りないんじゃないかと思った人も要るかと思いますが，主な理由としては:</p>
+
+<ul>
+<li>なんかフェーズを増やさない方が速そう</li>
+<li>高度な最適化を自前でする予定は最初からなかった</li>
+</ul>
+
+<p>などがあります.別になくても困らなかったわけですね．</p>
 
   </section>
 </article>
