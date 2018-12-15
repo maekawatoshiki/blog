@@ -72,10 +72,10 @@
 <h2 id="tl-dr">TL;DR</h2>
 
 <ol>
-<li>だいたいJSっぽいコードを書いて実行できる(===規格にまだ沿えていない)</li>
+<li>だいたいJSっぽいコードを書いて実行できる (規格にまだ沿えていない)</li>
 <li>REPLがちょっと使える</li>
-<li>Tracing-JITに部分的に対応している(===うまく行くと速い)</li>
-<li>最近，Rustで書いたDLLを<code>require</code>から使えるようになった(===もはやなんでもできる!)</li>
+<li>Tracing-JITに部分的に対応している (うまくいくと速い)</li>
+<li>最近，Rustで書いたDLLを<code>require</code>から使えるようになった (もはやなんでもできる!)</li>
 <li>また最近，非同期処理の実装を始めた</li>
 </ol>
 
@@ -132,7 +132,7 @@ user <span class="m">0</span>.19
 sys <span class="m">0</span>.00</code></pre></div>
 <p>数値だけ使ってるループとかはJITの対象になるので，そこそこ速く動きます．JITについてはまた後で.</p>
 
-<p>ああ，あと，動作確認済みのサンプルコードは<code>./examples/</code>に入っています．(どれも微妙なコードばっかりなので，適当に先にNodeJSとかで実行して出力を確認してみてください)</p>
+<p>あと，動作確認済みのサンプルコードは<code>./examples/</code>に入っています．(どれも微妙なコードばっかりなので，適当に先にNodeJSとかで実行して出力を確認してみてください)</p>
 
 <h3 id="2-repl">2. REPL</h3>
 
@@ -161,6 +161,93 @@ runtime error: reference error: <span class="s1">&#39;$&#39;</span> is not defin
 false</code></pre></div>
 <p><code>..</code>で複数行入力を開始できるようになっていますが，不便なので直したいですね．</p>
 
+<h3 id="3-tracing-jit-compiling">3. Tracing-JIT Compiling</h3>
+
+<blockquote>
+<p><strong>トレーシング実行時コンパイル</strong>（トレーシングじっこうじコンパイル、トレーシングJIT、<a href="https://ja.wikipedia.org/wiki/%E8%8B%B1%E8%AA%9E">英</a>: Tracing just-in-time compilation）は、プログラムの実行を<a href="https://ja.wikipedia.org/wiki/%E3%82%B3%E3%83%B3%E3%83%91%E3%82%A4%E3%83%A9%E6%9C%80%E9%81%A9%E5%8C%96">最適化</a>するために、実行時（runtime）に<a href="https://ja.wikipedia.org/wiki/%E4%BB%AE%E6%83%B3%E3%83%9E%E3%82%B7%E3%83%B3">仮想マシン</a>が用いる技術の一つ。頻繁に実行される演算の並びを記録し、それを<a href="https://ja.wikipedia.org/wiki/%E6%A9%9F%E6%A2%B0%E8%AA%9E">ネイティブコード</a>に<a href="https://ja.wikipedia.org/wiki/%E3%82%B3%E3%83%B3%E3%83%91%E3%82%A4%E3%83%A9">コンパイル</a>してから実行する。通常の<a href="https://ja.wikipedia.org/wiki/%E5%AE%9F%E8%A1%8C%E6%99%82%E3%82%B3%E3%83%B3%E3%83%91%E3%82%A4%E3%83%A9">実行時コンパイラ</a>（just-in-time compiler、JIT）はメソッド毎にこれを行っており、この点が異なる。</p>
+
+<p><a href="https://ja.wikipedia.org/wiki/%E3%83%88%E3%83%AC%E3%83%BC%E3%82%B7%E3%83%B3%E3%82%B0%E5%AE%9F%E8%A1%8C%E6%99%82%E3%82%B3%E3%83%B3%E3%83%91%E3%82%A4%E3%83%AB">トレーシング実行時コンパイル - Wikipedia</a></p>
+</blockquote>
+
+<p>Tracing-JITに対応しているので，いい感じのコードを書くといい感じの速度で実行されます．</p>
+
+<p>現在は関数，ループ単位でJITコンパイルを行っていて，数値やブール値を使った処理をしている場合(<code>console.log</code>では文字列を使っていいけど)はJITの対象となります．これがいい感じのコードってわけです．</p>
+
+<p>以下のようなフィボナッチ数を求める関数は当然JITコンパイルされて実行されます．</p>
+<div class="highlight"><pre class="chroma"><code class="language-js" data-lang="js"><span class="kd">function</span> <span class="nx">fibo</span><span class="p">(</span><span class="nx">x</span><span class="p">)</span> <span class="p">{</span>
+  <span class="k">if</span> <span class="p">(</span><span class="nx">x</span> <span class="o">&lt;</span> <span class="mi">2</span><span class="p">)</span> <span class="k">return</span> <span class="mi">1</span><span class="p">;</span>
+  <span class="k">return</span> <span class="nx">fibo</span><span class="p">(</span><span class="nx">x</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span> <span class="o">+</span> <span class="nx">fibo</span><span class="p">(</span><span class="nx">x</span> <span class="o">-</span> <span class="mi">2</span><span class="p">);</span>
+<span class="p">}</span>
+</code></pre></div>
+<h4 id="3-1-ちょっとだけ仕組みの解説">3.1 ちょっとだけ仕組みの解説</h4>
+
+<p>rapidusでは関数単位，ループ単位でJITを行いますが，関数のほうは呼ばれるときにJITするだけで特に面白くないので，ループのほうをちょっと解説します．</p>
+
+<p>rapidusのVMの命令群には<code>LOOP_START</code>という命令があります. <code>LOOP_START</code>はその場所からループが始まることを意味し，オペランドにはループの終了位置を相対距離で表現したものを取ります．</p>
+
+<pre><code>LOOP_START ループの終了位置(相対距離)
+</code></pre>
+
+<p>何をするのかというと, 以下のようなことです.</p>
+
+<ol>
+<li><p>ループの中身がすでにJITコンパイルされているか確認する</p>
+
+<ul>
+<li><p>ループ内部にJITコンパイル出来ない命令があったことを知らせるフラグが立っていたら，特に何もしないで3に飛ぶ</p></li>
+
+<li><p>コンパイル済みなのでそれを実行して，VMのプログラムカウンタを正しい位置にセットする. 3に飛ぶ</p></li>
+</ul></li>
+
+<li><p>ループが一定回数実行されたか確認する</p>
+
+<ul>
+<li><p>真なら，ループの中身をJITコンパイル</p>
+
+<ul>
+<li>コンパイルしたけど，ループ内部にJITコンパイルできない命令があったら，それを意味するフラグを立てる. 3に飛ぶ</li>
+<li>ちゃんとコンパイルできたら実行. VMのプログラムカウンタを正しい位置にセット．コンパイルして生成されたコードは取っておく. 3に飛ぶ</li>
+</ul></li>
+
+<li><p>偽なら，ループの実行回数をインクリメント. 3に飛ぶ</p></li>
+</ul></li>
+
+<li><p>おわり</p></li>
+</ol>
+
+<p><code>LOOP_START</code>を挿入してやれば，勝手にVMがJITしてくれるってわけですね．便利．</p>
+
+<p>実際には以下のように使われます．[005, 00C) がループの中身のようです．</p>
+
+<pre><code>000 何らかの命令
+...
+005 LOOP_START 7 # == 0xC(12) - 0x5 
+007 何らかの命令
+...
+00C 何らかの命令
+</code></pre>
+
+<h4 id="3-2-jitって-アセンブラでも書いたの">3.2 JITって アセンブラでも書いたの?</h4>
+
+<p>いいえ．LLVMの力を借りて作りました．</p>
+
+<h3 id="4-power-of-dlls">4. Power of DLLs</h3>
+
+<p>NodeJS用のコードを見ていて，<code>require</code>するモジュールってC++とかで書けるのかー，なんでもできて楽しそうだなぁ，と思ったので自分も作りました．</p>
+
+<p>RustでDynamic Link Libraryを作って，<code>require</code>で読み込ませると使えます．詳しいやり方はREADMEに書いてあるのでそちらを参照してください．</p>
+<div class="highlight"><pre class="chroma"><code class="language-js" data-lang="js"><span class="kd">var</span> <span class="nx">fs</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s2">&#34;fs&#34;</span><span class="p">)</span> <span class="err">#</span> <span class="nx">カレントディレクトリにlibfs</span><span class="p">.(</span><span class="nx">so</span><span class="o">|</span><span class="nx">dll</span><span class="o">|</span><span class="nx">dylib</span><span class="p">)</span><span class="nx">という名前</span>
+                       <span class="err">#</span> <span class="nx">のファイルがあれば</span><span class="p">,</span> <span class="nx">そこから読み込む</span>
+<span class="nx">fs</span><span class="p">.</span><span class="nx">writeFileSync</span><span class="p">(</span><span class="s2">&#34;a.txt&#34;</span><span class="p">,</span> <span class="s2">&#34;hello&#34;</span><span class="p">)</span> <span class="err">#</span> <span class="nx">適当に作ったwriteFileSyncを呼び出せる</span>
+</code></pre></div>
+<p>IoT機器とか，自分の作った言語処理系からいじったりできたら楽しいそうですよね．</p>
+
+<h3 id="5-非同期処理もどき">5. 非同期処理もどき</h3>
+
+<p>まだ最近作り始めたばっかりで，非同期処理と言って良いのかよくわからないレベルのものです．</p>
+
+<p>一応，<code>setTimeout</code>, <code>setInterval</code>, <code>clearTimeout</code>, <code>clearInterval</code>などを部分的に利用することができます．昔懐かしいWebサイトで沢山使われていそうな関数たちですね．あと，ファイルを非同期で読み込める関数も作ってみました(現在はaioブランチにある)．意外とちゃんと動いているので今後が楽しみです．</p>
+
 <h1 id="2-内部構造">2. 内部構造</h1>
 
 <p>内部構造なんて大層なものではないですが、大体こんな感じ:</p>
@@ -181,7 +268,11 @@ false</code></pre></div>
 
 <p>rapidusのパーサーは基本的に手書きの再帰下降構文解析器で構成されています．若干コード生成に関係するような処理もしていますが，基本的にはパーサーとしての機能のみを果たしています．特に面白い実装がしてあるわけでもないです．</p>
 
-<h2 id="意味解析">意味解析</h2>
+<h2 id="コード生成-src-vm-codegen-rs">コード生成 (<code>src/vm_codegen.rs</code>)</h2>
+
+<p>コード生成とは言っていますが，意味解析も少し含んでいます．</p>
+
+<p>基本的にはパーサーが生成したASTを巡回しながらVM命令を生成していくだけです．</p>
 
   </section>
 </article>
