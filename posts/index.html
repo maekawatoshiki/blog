@@ -45,10 +45,10 @@
   <section class="summary">
     この記事は何? セキュリティキャンプ 修了生進捗 #seccamp OB/OG Advent Calendar 2018 20日目。
 この記事では，セキュキャンが始まるちょっと前から作り始めた自作JSエンジン rapidus の進捗と，簡単に内部構造を説明していきたいと思います．
-目次  概要 言語処理系とは 内部構造  パーサー コード生成 VM   1. 概要 TL;DR  だいたいJSっぽいコードを書いて実行できる (規格にまだ沿えていない) REPLがちょっと使える Tracing-JITに部分的に対応している (うまくいくと速い) 最近，Rustで書いたDLLをrequireから使えるようになった (もはやなんでもできる!) また最近，非同期処理の実装を始めた  ちょっと詳しく 1. だいたいJS だいたいJSというのは，規格に沿えていなかったり 意外と基本的な機能が抜けている，という意味です．例えば，この記事を書いている時点ではObjectオブジェクトがなかったり(作り始めた)，組み込みオブジェクトの機能が足りていなかったりします．
+1. 概要 TL;DR  だいたいJSっぽいコードを書いて実行できる (規格にまだ沿えていない) REPLがちょっと使える Tracing-JITに部分的に対応している (うまくいくと速い) 最近，Rustで書いたDLLをrequireから使えるようになった (もはやなんでもできる!) また最近，非同期処理の実装を始めた  ちょっと詳しく 1. だいたいJS だいたいJSというのは，規格に沿えていなかったり 意外と基本的な機能が抜けている，という意味です．例えば，この記事を書いている時点ではObjectオブジェクトがなかったり(作り始めた)，組み込みオブジェクトの機能が足りていなかったりします．
 ですが大体はJSなので，そこそこのコードは動きます．ちゃんとプロトタイプチェーンで継承的なこともできますよ．
 ミラーラビン素数判定法で素数(&lt;2^32)を判定したい! というニッチな需要にも対応できます．
-function prime(n) { if (n == 2 || n == 3) return true; if ((n &amp; 1) == 0) return false; var d = n - 1; while ((d &amp; 1) == 0) d = Math.  <a href="https://maekawatoshiki.github.io/blog/posts/%E8%87%AA%E4%BD%9Cjavascript%E3%82%A8%E3%83%B3%E3%82%B8%E3%83%B3%E3%81%AE%E9%80%B2%E6%8D%97/">Read More...</a>
+function prime(n) { if (n == 2 || n == 3) return true; if ((n &amp; 1) == 0) return false; var d = n - 1; while ((d &amp; 1) == 0) d = Math.floor(d &gt;&gt; 1); for (var k = 0; k &lt; 20; k++) { var t = d; var x = modpow(1 + Math.  <a href="https://maekawatoshiki.github.io/blog/posts/%E8%87%AA%E4%BD%9Cjavascript%E3%82%A8%E3%83%B3%E3%82%B8%E3%83%B3%E3%81%AE%E9%80%B2%E6%8D%97/">Read More...</a>
   </section>
 </article>
 
