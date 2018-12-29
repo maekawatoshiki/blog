@@ -35,6 +35,28 @@
   <h1 class="list-title">Posts</h1>
   
     <article class="list-item" itemscope itemtype="http://schema.org/Blog">
+  <h2 class="headline" itemprop="headline"><a href="https://maekawatoshiki.github.io/blog/posts/%E8%87%AA%E4%BD%9Cjvm%E3%81%AE%E9%80%B2%E6%8D%97%E3%82%92%E6%9B%B8%E3%81%8F%E3%81%A8%E3%81%93%E3%82%8D/">自作JVMの進捗を書くところ (Draft)</a></h2>
+  <div class="meta">
+
+    <span class="key">published on</span>
+    <span class="val"><time itemprop="datePublished" datetime="2018-12-29">December 29, 2018</time></span>
+
+  </div>
+  <section class="summary">
+    GitHubでコミットログ見てればなんとなく進捗はわかるけど，ちゃんと文章として書きだしたほうがいいかなって．
+簡単な説明: JVM作るって何 突然ですが，皆さん，JVM使ってますか？
+僕は(明示的には)使ってません．ですが 3 Billion Devices Run Java と言うくらいですから，世の中はJVMに支えられて動いているんでしょう．
+だとしたら，どうしますか？
+JVMを一から作ってみたくなりますよね?．
+作り始めた動機は，これが全てです．
+現状  以下の情報は 2018/Dec/29 時点での情報です．  どれくらい実用的なの ちょうど今日で，作り始めてから一週間です．実用的なものなんて作れるわけ無いです．
+じゃあどれくらい動くの  javacを使って作ったクラスファイルを直接実行できる．  == クラスファイルの読み込み自体は(実装してない部分もあるけど)だいたいOK  地道にJVMの命令を実装している．今は約70命令実装済み． JDKの提供してくれるSystem.out.printlnとかはまだ読み込んで利用することができない．(命令が実装できてないので)  なので自作した．nativeなメソッドとして実装．以下実装済み System  static final PrintStream outがあるだけ  PrintStream  println(int) println(double) println(String)  String  valueOf(int)  StringBuilder  append(int) append(String) toString()  Object  形だけだけど．    いくつかサンプル 以下のコードはぜんぶ動く(はず)
+ static {}を使った初期化ができる．System.outを作るときに必要だった． もちろん，ただのコンストラクタもあるよ．  class A { public static final int x; static { x = 123; } A() { System.  <a href="https://maekawatoshiki.github.io/blog/posts/%E8%87%AA%E4%BD%9Cjvm%E3%81%AE%E9%80%B2%E6%8D%97%E3%82%92%E6%9B%B8%E3%81%8F%E3%81%A8%E3%81%93%E3%82%8D/">Read More...</a>
+  </section>
+</article>
+
+  
+    <article class="list-item" itemscope itemtype="http://schema.org/Blog">
   <h2 class="headline" itemprop="headline"><a href="https://maekawatoshiki.github.io/blog/posts/%E8%87%AA%E4%BD%9Cjavascript%E3%82%A8%E3%83%B3%E3%82%B8%E3%83%B3%E3%81%AE%E9%80%B2%E6%8D%97/">自作JavaScriptエンジンの進捗</a></h2>
   <div class="meta">
 
