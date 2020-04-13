@@ -64,6 +64,24 @@
   <div class="article-list">
     
       <article class="list-item" itemscope itemtype="http://schema.org/Blog">
+  <h2 class="headline" itemprop="headline"><a href="https://maekawatoshiki.github.io/blog/posts/%E8%87%AA%E4%BD%9C%E3%82%B3%E3%83%B3%E3%83%91%E3%82%A4%E3%83%A9%E5%9F%BA%E7%9B%A4%E3%81%AE%E5%86%85%E9%83%A8%E6%A7%8B%E9%80%A0%E3%82%92%E6%9B%B8%E3%81%8F%E3%81%A8%E3%81%93%E3%82%8D/">自作コンパイラ基盤の内部構造を書くところ</a></h2>
+  <div class="meta">
+
+    <span class="key">published on</span>
+    <span class="val"><time itemprop="datePublished" datetime="2020-04-13">April 13, 2020</time></span>
+
+  </div>
+  <section class="summary">
+    これは何 自作コンパイラ基盤(以下面倒なのでcilk) の内部構造の解説を，気が向いた時に書いていく．
+ざっくり  まず，IRがある  IRに対して色々最適化したりもする．mem2regとかね．今は省略  DAG(Directed Acyclic Graph)形式に変換する
+ なぜDAGにするの? → 木構造のほうが命令パターンマッチしやすい   Combine: 命令同士を合併したりする．LLVMなら，cmpとbrをbrcondにしたり． Legalize: アーキテクチャが対応していない(命令|型)を，対応している(命令|型)に変換したりする．例えば，cilkでは，ここでアドレス同士の足し算をLEA(x86ならね)に変換したりする． Instruction Selection: 名前の示す通り，適切なマシン命令を選択する．cilkでは，Rustのマクロで簡潔に命令パターンマッチを記述できるよう目指している．  マシンアセンブリ向け形式(以下MachineInst)に変換する
+ ここからはアーキテクチャごとにやることが大きく違うと思う ここでは，cilkがある程度まともに対応しているx86を例にとる   Phi Elimination: cilkのIRはSSAだからphiが存在する．ここではphiを取り除く Two Address Conversion: a = ADD b, cのような命令を，a = COPY b と a = ADD a, c に変換する． Register Allocation: 無限個の仮想レジスタに有限個の物理レジスタを割り当てる．cilkでは，普通レジスタ割当にはグラフ彩色を利用するところだけれど，Linear Scanのような何かを利用している．何かというのは，色々いじっている間にLinear ScanなのにSpill Weightのことを考えていたりして，正直よくわからなくなっているから． Prolgoue&amp;Epilogue Insertion: 関数のプロローグ・エピローグを挿入する．push rbpとか． あとは細々したことをやったりする．浮動小数点数の即値をメモリ上に配置したり．  MachineInstを実際のアセンブリに変換する
+  完成 
+  </section>
+</article>
+
+    
+      <article class="list-item" itemscope itemtype="http://schema.org/Blog">
   <h2 class="headline" itemprop="headline"><a href="https://maekawatoshiki.github.io/blog/posts/%E8%87%AA%E4%BD%9Cjvm%E3%81%AE%E9%80%B2%E6%8D%97%E3%82%92%E6%9B%B8%E3%81%8F%E3%81%A8%E3%81%93%E3%82%8D/">自作JVMの進捗を書くところ</a></h2>
   <div class="meta">
 
@@ -104,21 +122,6 @@ function prime(n) { if (n == 2 || n == 3) return true; if ((n &amp; 1) == 0) ret
 </article>
 
     
-      <article class="list-item" itemscope itemtype="http://schema.org/Blog">
-  <h2 class="headline" itemprop="headline"><a href="https://maekawatoshiki.github.io/blog/posts/%E3%83%86%E3%82%B9%E3%83%88/">テスト</a></h2>
-  <div class="meta">
-
-    <span class="key">published on</span>
-    <span class="val"><time itemprop="datePublished" datetime="2018-12-08">December 08, 2018</time></span>
-
-  </div>
-  <section class="summary">
-     普通に使えそう Hugoって便利
-C  C  Rust  Rust   
-  </section>
-</article>
-
-    
   </div>
 
 
@@ -132,7 +135,7 @@ C  C  Rust  Rust
 
 <footer>
   <div class="container">
-    <span class="copyright">&copy; 2018 uint256_t&#39;s blog - <a rel="license" href="http://creativecommons.org/licenses/by/4.0/">CC BY 4.0</a></span>
+    <span class="copyright">&copy; 2020 uint256_t&#39;s blog - <a rel="license" href="http://creativecommons.org/licenses/by/4.0/">CC BY 4.0</a></span>
   </div>
 </footer>
 
