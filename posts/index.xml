@@ -20,7 +20,7 @@
       <description>これは何 自作コンパイラ基盤(以下面倒なのでcilk) の内部構造の解説を，気が向いた時に書いていく．
 ざっくり  まず，IRがある  IRに対して色々最適化したりもする．mem2regとかね．今は省略  DAG(Directed Acyclic Graph)形式に変換する
  なぜDAGにするの? → 木構造のほうが命令パターンマッチしやすい   Combine: 命令同士を合併したりする．LLVMなら，cmpとbrをbrcondにしたり． Legalize: アーキテクチャが対応していない(命令|型)を，対応している(命令|型)に変換したりする．例えば，cilkでは，ここでアドレス同士の足し算をLEA(x86ならね)に変換したりする． Instruction Selection: 名前の示す通り，適切なマシン命令を選択する．cilkでは，Rustのマクロで簡潔に命令パターンマッチを記述できるよう目指している．  マシンアセンブリ向け形式(以下MachineInst)に変換する
- ここからはアーキテクチャごとにやることが大きく違うと思う ここでは，cilkがある程度まともに対応しているx86を例にとる   Phi Elimination: cilkのIRはSSAだからphiが存在する．ここではphiを取り除く Two Address Conversion: a = ADD b, cのような命令を，a = COPY b と a = ADD a, c に変換する． Register Allocation: 無限個の仮想レジスタに有限個の物理レジスタを割り当てる．cilkでは，普通レジスタ割当にはグラフ彩色を利用するところだけれど，Linear Scanのような何かを利用している．何かというのは，色々いじっている間にLinear ScanなのにSpill Weightのことを考えていたりして，正直よくわからなくなっているから． Prolgoue&amp;amp;Epilogue Insertion: 関数のプロローグ・エピローグを挿入する．push rbpとか． あとは細々したことをやったりする．浮動小数点数の即値をメモリ上に配置したり．  MachineInstを実際のアセンブリに変換する
+ ここからはアーキテクチャごとにやることが大きく違うと思う ここでは，cilkがある程度まともに対応しているx86を例にとる   Phi Elimination: cilkのIRはSSAだからphiが存在する．ここではphiを取り除く Two Address Conversion: a = ADD b, cのような命令を，a = COPY b と a = ADD a, c に変換する． Register Allocation: 無限個の仮想レジスタに有限個の物理レジスタを割り当てる．cilkでは，普通レジスタ割当にはグラフ彩色を利用するところだけれど，Linear Scanのような何かを利用している．何かというのは，色々いじっている間にLinear ScanなのにSpill Weightのことを考えていたりして，正直よくわからなくなっているから． Prologue&amp;amp;Epilogue Insertion: 関数のプロローグ・エピローグを挿入する．push rbpとか． あとは細々したことをやったりする．浮動小数点数の即値をメモリ上に配置したり．  MachineInstを実際のアセンブリに変換する
   完成</description>
     </item>
     

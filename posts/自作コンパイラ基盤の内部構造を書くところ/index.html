@@ -83,7 +83,7 @@
 <li>Phi Elimination: cilkのIRはSSAだからphiが存在する．ここではphiを取り除く</li>
 <li>Two Address Conversion: <code>a = ADD b, c</code>のような命令を，<code>a = COPY b と a = ADD a, c</code> に変換する．</li>
 <li>Register Allocation: 無限個の仮想レジスタに有限個の物理レジスタを割り当てる．cilkでは，普通レジスタ割当にはグラフ彩色を利用するところだけれど，Linear Scanのような何かを利用している．何かというのは，色々いじっている間にLinear ScanなのにSpill Weightのことを考えていたりして，正直よくわからなくなっているから．</li>
-<li>Prolgoue&amp;Epilogue Insertion: 関数のプロローグ・エピローグを挿入する．<code>push rbp</code>とか．</li>
+<li>Prologue&amp;Epilogue Insertion: 関数のプロローグ・エピローグを挿入する．<code>push rbp</code>とか．</li>
 <li>あとは細々したことをやったりする．浮動小数点数の即値をメモリ上に配置したり．</li>
 </ol></li>
 
